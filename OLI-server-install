@@ -1,0 +1,74 @@
+#!/bin/bash
+#VSFTPD Installation Script
+#will install and setup a vsftpd server for use with the OLI platform
+
+CONFIG_FILE="etc/vsftpd.conf.test"
+
+
+#makes sure script runs as root
+if [[ $(whoami) != 'root' ]] 
+then 
+ echo "Please run me as root instead of $(whoami)!!!!"
+ echo "Proper usage: sudo ./OLI-server-uninstall" 
+ exit 1
+fi
+
+
+
+#installs vsftpd
+sudo apt-get install vsftpd -y
+
+#create an executable uninstall script
+touch OLI-server-uninstall
+
+echo "#!/bin/bash
+#This will uninstall the OLI-file server used for app-sim communication
+#please run me as ROOT!!!
+
+#makes sure script runs as root
+if [[ $(whoami) != 'root' ]] 
+then 
+ echo "Please run me as root instead of $(whoami)!!!!"
+ echo "Proper usage: sudo ./OLI-server-uninstall" 
+ exit 1
+fi
+
+#remove vsftpd and it's files
+sudo apt remove vsftpd --purge -y
+#remove ftp oli user and it's home directory
+sudo userdel -r oli" >> OLI-server-uninstall
+
+chmod +x OLI-server-uninstall
+
+#edit configuration file
+cd / 
+
+echo "listen=NO
+listen_ipv6=YES
+anonymous_enable=NO
+local_enable=YES
+write_enable=YES
+local_umask=022
+dirmessage_enable=YES
+use_localtime=YES
+xferlog_enable=YES
+connect_from_port_20=YES
+chroot_local_user=YES
+secure_chroot_dir=/var/run/vsftpd/empty
+pam_service_name=vsftpd
+rsa_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
+rsa_private_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+ssl_enable=Yes
+pasv_enable=Yes
+pasv_min_port=10000
+pasv_max_port=10100
+allow_writeable_chroot=YES
+ssl_tlsv1=YES
+ssl_sslv2=NO
+ssl_sslv3=NO" >> $CONFIG_FILE
+
+#starts vsftpd server
+service vsftpd start
+service vsftpd status
+
+
