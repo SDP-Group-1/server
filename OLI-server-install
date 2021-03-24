@@ -67,8 +67,14 @@ ssl_tlsv1=YES
 ssl_sslv2=NO
 ssl_sslv3=NO" >> $CONFIG_FILE
 
+#add a user with name and password OLI
+echo "adding a new user for the app to connect to!"
+echo "please set the password for this account to: OLI"
+adduser OLI
+
 #starts vsftpd server
 service vsftpd start
 service vsftpd status
+
 
 
